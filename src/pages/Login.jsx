@@ -5,6 +5,7 @@ import Mark from '../components/Mark.jsx';
 
 // Cuentas de demostración creadas por `npm run db:seed` en el backend
 const DEMO = [
+  { label: 'Arturo (admin)', email: 'arturo@ecohome.com' },
   { label: 'Ventas',    email: 'ventas@ecohome.com' },
   { label: 'Logística', email: 'logistica@ecohome.com' },
   { label: 'Soporte',   email: 'soporte@ecohome.com' },
@@ -25,7 +26,7 @@ export default function Login() {
     setError('');
     try {
       await login(email, password);
-      navigate('/chat', { replace: true });
+      navigate('/catalogo', { replace: true });
     } catch (err) {
       setError(err.status === 401 ? 'Correo o contraseña incorrectos.' : err.message);
       setBusy(false);
@@ -47,8 +48,8 @@ export default function Login() {
       <section className="login-panel">
         <form className="login-card" onSubmit={submit} noValidate>
           <div className="brand"><Mark /><span>EcoHome <em>Store</em></span></div>
-          <h1>Chat del equipo</h1>
-          <p className="muted">Entra con tu cuenta de trabajo para hablar con tus compañeros en tiempo real.</p>
+          <h1>Panel del equipo</h1>
+          <p className="muted">Entra con tu cuenta de trabajo para gestionar el catálogo y hablar con tus compañeros en tiempo real.</p>
 
           {notice && <p className="alert alert--info" role="status">{notice}</p>}
           {error && <p className="alert alert--error" role="alert">{error}</p>}

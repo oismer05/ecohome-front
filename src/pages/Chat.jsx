@@ -1,8 +1,5 @@
+import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { useChat } from '../hooks/useChat.js';
-import Mark from '../components/Mark.jsx';
-import Avatar from '../components/Avatar.jsx';
-import OnlineUsers from '../components/OnlineUsers.jsx';
 import MessageList from '../components/MessageList.jsx';
 import Composer from '../components/Composer.jsx';
 import { roleOf } from '../components/roles.js';
@@ -15,27 +12,11 @@ const STATUS = {
 };
 
 export default function Chat() {
-  const { token, user, logout } = useAuth();
-  const { status, messages, online, problem, send } = useChat(token, { onSessionLost: logout });
+  const { user } = useAuth();
+  const { status, messages, problem, send } = useOutletContext();   // conexión compartida (Shell)
   const st = STATUS[status];
 
-  if (!user) return <div className="splash" role="status">Cargando tu perfil…</div>;
-
   return (
-    <div className="chat-shell">
-      <aside className="sidebar">
-        <div className="brand brand--light"><Mark /><span>EcoHome <em>Store</em></span></div>
-        <OnlineUsers users={online} meId={user.id} />
-        <div className="me">
-          <Avatar name={user.name} role={user.role} />
-          <span className="people-text">
-            <strong>{user.name}</strong>
-            <small>{roleOf(user.role).label}</small>
-          </span>
-          <button className="btn btn--ghost-light" onClick={() => logout()}>Salir</button>
-        </div>
-      </aside>
-
       <main className="chat">
         <header className="chat-head">
           <div>
@@ -58,6 +39,5 @@ export default function Chat() {
           </>
         )}
       </main>
-    </div>
   );
 }

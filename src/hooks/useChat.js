@@ -17,6 +17,7 @@ const REASONS = {
  *   messages últimos 10 al entrar + los nuevos en tiempo real
  *   online   personas conectadas ahora
  *   send(text) -> Promise (espera la confirmación del servidor)
+ *   subscribeCatalog(fn) -> avisos "products-changed" (unidad 3: alguien creó/editó un producto)
  */
 export function useChat(token, { onSessionLost }) {
   const [status, setStatus] = useState('connecting');
@@ -24,6 +25,7 @@ export function useChat(token, { onSessionLost }) {
   const [online, setOnline] = useState([]);
   const [problem, setProblem] = useState('');
   const socketRef = useRef(null);
+  const catalogListeners = useRef(new Set());
   const lostRef = useRef(onSessionLost);
   lostRef.current = onSessionLost;
 
@@ -55,6 +57,7 @@ export function useChat(token, { onSessionLost }) {
     )));
     socket.on('online-users', setOnline);
     socket.on('chat-error', (e) => setProblem(e.message));
+    socket.on('products-changed', (evt) => catalogListeners.current.forEach((fn) => fn(evt)));
 
     return () => { socket.disconnect(); socketRef.current = null; };
   }, [token]);
@@ -69,5 +72,10 @@ export function useChat(token, { onSessionLost }) {
     });
   }), []);
 
-  return { status, messages, online, problem, send };
+  const subscribeCatalog = useCallback((fn) => {
+    catalogListeners.current.add(fn);
+    return () => catalogListeners.current.delete(fn);
+  }, []);
+
+  return { status, messages, online, problem, send, subscribeCatalog };
 }

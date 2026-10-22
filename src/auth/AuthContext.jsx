@@ -17,11 +17,13 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(Boolean(store.get()));
   const [notice, setNotice] = useState('');   // mensaje para mostrar en el login (sesión vencida, etc.)
+  const [stats, setStats] = useState(null);   // { productsCreated, label: "Nombre (N)" }
 
   const logout = useCallback((reason = '') => {
     store.clear();
     setToken(null);
     setUser(null);
+    setStats(null);
     setNotice(reason);
   }, []);
 
@@ -48,9 +50,23 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  // Contador de productos creados por el usuario autenticado (GET /users/me/stats)
+  const refreshStats = useCallback(async () => {
+    if (!token) return;
+    try { setStats(await api.myStats(token)); } catch { /* se reintenta en el próximo cambio */ }
+  }, [token]);
+
+  useEffect(() => { if (token && user) refreshStats(); }, [token, user, refreshStats]);
+
+  // Tras crear un producto el número cambia al instante y luego se confirma con el backend.
+  const bumpStats = useCallback(() => {
+    setStats((s) => (s && user ? { ...s, productsCreated: s.productsCreated + 1, label: `${user.name} (${s.productsCreated + 1})` } : s));
+    refreshStats();
+  }, [user, refreshStats]);
+
   const value = useMemo(
-    () => ({ token, user, checking, notice, login, logout }),
-    [token, user, checking, notice, login, logout]
+    () => ({ token, user, checking, notice, login, logout, stats, refreshStats, bumpStats }),
+    [token, user, checking, notice, login, logout, stats, refreshStats, bumpStats]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

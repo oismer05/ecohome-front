@@ -30,4 +30,9 @@ async function request(path, { method = 'GET', body, token } = {}) {
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
   me: (token) => request('/auth/me', { token }),
+  // Unidad 3: catálogo con creador y contador "Nombre (N)"
+  products: (token) => request('/products', { token }),
+  createProduct: (token, product) => request('/products', { method: 'POST', token, body: product }),
+  myStats: (token) => request('/users/me/stats', { token }),
+  creatorsStats: (token) => request('/users/stats', { token }),
 };
